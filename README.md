@@ -1,2 +1,2 @@
 # github-action-workflow
-GitHub Actions compitable workflows
+GitHub Actions compatible workflows
