@@ -10,6 +10,8 @@ FROM ubuntu:kinetic
 LABEL "repository"="https://github.com/linuxsuren/github-action-workflow"
 LABEL "homepage"="https://github.com/linuxsuren/github-action-workflow"
 
+RUN mkdir -p /home/argocd/cmp-server/config
 COPY --from=builder /workspace/gaw /usr/local/bin/gaw
+COPY --from=builder /workspace/plugin.yaml /home/argocd/cmp-server/config/plugin.yaml
 
 CMD ["gaw"]

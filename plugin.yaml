@@ -1,0 +1,11 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ConfigManagementPlugin
+metadata:
+  name: gaw-plugin
+spec:
+  version: v1.0
+  generate:
+    command: [gaw, convert, '.github/workflows/pull-request.yaml']
+  discover:
+    fileName: "./.github/workflows/*.yaml"
+  lockRepo: true

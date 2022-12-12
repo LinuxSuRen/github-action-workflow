@@ -8,3 +8,34 @@ GitHub Actions compatible workflows
 ```shell
 gaw convert .github/workflows/pull-request.yaml
 ```
+
+## As CMP
+This repository could be [Config Management Plugin](https://argo-cd.readthedocs.io/en/stable/user-guide/config-management-plugins/#option-2-configure-plugin-via-sidecar) as well.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-repo-server
+spec:
+  template:
+    spec:
+      containers:
+      - args:
+        - --loglevel
+        - debug
+        command:
+        - /var/run/argocd/argocd-cmp-server
+        image: ghcr.io/linuxsuren/github-action-workflow:master
+        imagePullPolicy: IfNotPresent
+        name: tool
+        resources: {}
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 999
+        volumeMounts:
+        - mountPath: /var/run/argocd
+          name: var-files
+        - mountPath: /home/argocd/cmp-server/plugins
+          name: plugins
+```
