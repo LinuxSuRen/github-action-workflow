@@ -2,3 +2,9 @@
 
 # github-action-workflow
 GitHub Actions compatible workflows
+
+## Usage
+
+```shell
+gaw convert .github/workflows/pull-request.yaml
+```

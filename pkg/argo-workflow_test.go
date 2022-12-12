@@ -17,6 +17,10 @@ func TestWorkflow_ConvertToArgoWorkflow(t *testing.T) {
 		name:          "simple",
 		githubActions: "data/github-actions.yaml",
 		argoWorkflows: "data/argo-workflows.yaml",
+	}, {
+		name:          "with image",
+		githubActions: "data/github-action-image.yaml",
+		argoWorkflows: "data/argo-workflows-image.yaml",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
