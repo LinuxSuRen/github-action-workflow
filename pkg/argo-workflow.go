@@ -35,6 +35,9 @@ func (w *Workflow) ConvertToArgoWorkflow() (output string, err error) {
 			} else if strings.HasPrefix(w.Jobs[i].Steps[j].Uses, "goreleaser/goreleaser-action") {
 				w.Jobs[i].Steps[j].Image = "goreleaser/goreleaser:v1.13.1"
 				w.Jobs[i].Steps[j].Run = "goreleaser " + w.Jobs[i].Steps[j].With["args"]
+			} else if strings.HasPrefix(w.Jobs[i].Steps[j].Uses, "docker://") {
+				w.Jobs[i].Steps[j].Image = strings.TrimPrefix(w.Jobs[i].Steps[j].Uses, "docker://")
+				w.Jobs[i].Steps[j].Run = w.Jobs[i].Steps[j].With["args"]
 			} else if w.Jobs[i].Steps[j].Uses != "" {
 				// TODO not support yet, do nothing
 			} else {
