@@ -1,26 +1,61 @@
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
-  name: script
+  name: build
 spec:
   entrypoint: main
+  volumeClaimTemplates:
+    - metadata:
+        name: work
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 64Mi
+
   templates:
     - name: main
-      steps:
-        - - name: shell
-            template: shell
-          - name: python
-            template: python
-    - name: shell
+      dag:
+        tasks:
+          - name: clone
+            template: clone
+          - name: test
+            template: test
+          - name: goreleaser
+            template: goreleaser
+    - name: clone
       script:
-        image: alpine
+        image: alpine/git:v2.26.2
         command: [sh]
-        source: echo 1
-    - name: python
-      script:
-        image: python:alpine3.6
-        command: [python]
         source: |
-          import random
-          i = random.randint(1, 100)
-          print(i)
+          git clone https://gitee.com/LinuxSuRen/yaml-readme .
+        volumeMounts:
+          - mountPath: /work
+            name: work
+        workingDir: /work
+    - name: test
+      script:
+        image: golang:1.18
+        command: [sh]
+        env:
+          - name: GOPROXY
+            value: https://goproxy.io,direct
+        source: |
+          go test ./... -coverprofile coverage.out
+        volumeMounts:
+          - mountPath: /work
+            name: work
+        workingDir: /work
+    - name: goreleaser
+      script:
+        image: goreleaser/goreleaser:v1.13.1
+        command: [sh]
+        env:
+          - name: GOPROXY
+            value: https://goproxy.io,direct
+        source: |
+          goreleaser release --skip-publish --rm-dist
+        volumeMounts:
+          - mountPath: /work
+            name: work
+        workingDir: /work

@@ -40,6 +40,7 @@ func (w *Workflow) ConvertToArgoWorkflow() (output string, err error) {
 			} else {
 				w.Jobs[i].Steps[j].Image = defaultImage
 			}
+			w.Jobs[i].Steps[j].Run = strings.TrimSpace(w.Jobs[i].Steps[j].Run)
 		}
 
 		// TODO currently we can only handle one job
@@ -51,7 +52,7 @@ func (w *Workflow) ConvertToArgoWorkflow() (output string, err error) {
 
 	data := bytes.NewBuffer([]byte{})
 	if err = t.Execute(data, w); err == nil {
-		output = data.String()
+		output = strings.TrimSpace(data.String())
 	}
 	return
 }
@@ -63,7 +64,6 @@ metadata:
   name: {{.Name}}
 spec:
   entrypoint: main
-
   volumeClaimTemplates:
     - metadata:
         name: work
@@ -74,38 +74,39 @@ spec:
             storage: 64Mi
 
   templates:
-  - name: main
-    steps:
-  {{- range $key, $job := .Jobs}}
-  {{- range $i, $step := $job.Steps}}
-  {{if $step.Image}}
-    - - name: {{$step.Name}}
-        template: {{$step.Name}}
-  {{end}}
-  {{- end}}
-  {{end}}
+    - name: main
+      dag:
+        tasks:
+      {{- range $key, $job := .Jobs}}
+      {{- range $i, $step := $job.Steps}}
+      {{- if $step.Image}}
+          - name: {{$step.Name}}
+            template: {{$step.Name}}
+      {{- end}}
+      {{- end}}
+      {{- end}}
 
-  {{- range $key, $job := .Jobs}}
-  {{- range $i, $step := $job.Steps}}
-  {{if $step.Image}}
-  - name: {{$step.Name}}
-    script:
-      image: {{$step.Image}}
-      command: [sh]
-      {{if $step.Env}}
-      env:
-      {{- range $k, $v := $step.Env}}
-        - name: {{$k}}
-          value: {{$v}}
-      {{end}}
-      {{end}}
-      source: |
-        {{$step.Run}}
-      volumeMounts:
-        - mountPath: /work
-          name: work
-      workingDir: /work
-  {{end}}
-  {{- end}}
-  {{end}}
+      {{- range $key, $job := .Jobs}}
+      {{- range $i, $step := $job.Steps}}
+      {{- if $step.Image}}
+    - name: {{$step.Name}}
+      script:
+        image: {{$step.Image}}
+        command: [sh]
+        {{- if $step.Env}}
+        env:
+        {{- range $k, $v := $step.Env}}
+          - name: {{$k}}
+            value: {{$v}}
+        {{- end}}
+        {{- end}}
+        source: |
+          {{$step.Run}}
+        volumeMounts:
+          - mountPath: /work
+            name: work
+        workingDir: /work
+      {{- end}}
+      {{- end}}
+      {{- end}}
 `

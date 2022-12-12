@@ -34,10 +34,7 @@ func TestWorkflow_ConvertToArgoWorkflow(t *testing.T) {
 
 			wantData, err := os.ReadFile(tt.argoWorkflows)
 			assert.Nil(t, err)
-
-			if gotOutput != string(wantData) {
-				t.Errorf("ConvertToArgoWorkflow() gotOutput = %v, want %v", gotOutput, string(wantData))
-			}
+			assert.Equal(t, string(wantData), gotOutput)
 		})
 	}
 }
