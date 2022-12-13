@@ -1,12 +1,19 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/linuxsuren/github-action-workflow/pkg"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 )
+
+func TestCmdConvert(t *testing.T) {
+	command := newConvertCmd()
+	assert.Equal(t, "convert", command.Use)
+}
 
 func Test_convertOption_convert(t *testing.T) {
 	type fields struct {
@@ -132,6 +139,123 @@ func Test_convertOption_convertWorkflows(t *testing.T) {
 				tt.wantOutput = string(data)
 			}
 			assert.Equal(t, tt.wantOutput, gotOutput)
+		})
+	}
+}
+
+func Test_convertOption_convertWorkflowsFromFilePath(t *testing.T) {
+	type fields struct {
+		env map[string]string
+	}
+	type args struct {
+		targetPath string
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		args       args
+		wantResult string
+		wantErr    assert.ErrorAssertionFunc
+	}{{
+		name:       "one github workflow",
+		args:       args{targetPath: "data/github-workflow-*.yaml"},
+		wantResult: simpleWorkflow,
+		wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			assert.Nil(t, err)
+			return true
+		},
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := &convertOption{
+				env: tt.fields.env,
+			}
+			gotResult, err := o.convertWorkflowsFromFilePath(tt.args.targetPath)
+			if !tt.wantErr(t, err, fmt.Sprintf("convertWorkflowsFromFilePath(%v)", tt.args.targetPath)) {
+				return
+			}
+			assert.Equalf(t, tt.wantResult, gotResult, "convertWorkflowsFromFilePath(%v)", tt.args.targetPath)
+		})
+	}
+}
+
+const simpleWorkflow = `
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: build
+spec:
+  entrypoint: main
+  volumeClaimTemplates:
+    - metadata:
+        name: work
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 64Mi
+
+  templates:
+    - name: main
+      dag:
+        tasks:
+          - name: test
+            template: test
+    - name: test
+      script:
+        image: alpine
+        command: [sh]
+        source: |
+          go test ./... -coverprofile coverage.out
+        volumeMounts:
+          - mountPath: /work
+            name: work
+        workingDir: /work`
+
+func Test_convertOption_runE(t *testing.T) {
+	type fields struct {
+		env map[string]string
+	}
+	type args struct {
+		cmd  *cobra.Command
+		args []string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		prepare func(c *cobra.Command) *bytes.Buffer
+		check   func(t assert.TestingT, buf *bytes.Buffer)
+		wantErr assert.ErrorAssertionFunc
+	}{{
+		name: "simple",
+		args: args{
+			cmd:  &cobra.Command{},
+			args: []string{"data/github-workflow-*.yaml"},
+		},
+		prepare: func(c *cobra.Command) *bytes.Buffer {
+			buf := bytes.Buffer{}
+			c.SetOut(&buf)
+			return &buf
+		},
+		check: func(t assert.TestingT, buf *bytes.Buffer) {
+			assert.Equal(t, simpleWorkflow+"\n", buf.String())
+		},
+		wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			assert.Nil(t, err)
+			return true
+		},
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := &convertOption{
+				env: tt.fields.env,
+			}
+			buf := tt.prepare(tt.args.cmd)
+			err := o.runE(tt.args.cmd, tt.args.args)
+			tt.check(t, buf)
+			tt.wantErr(t, err, fmt.Sprintf("runE(%v, %v)", tt.args.cmd, tt.args.args))
 		})
 	}
 }

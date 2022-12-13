@@ -28,19 +28,17 @@ func newConvertCmd() (c *cobra.Command) {
 }
 
 func (o *convertOption) runE(cmd *cobra.Command, args []string) (err error) {
-	gh := &pkg.Workflow{}
-	var data []byte
-	if data, err = os.ReadFile(args[0]); err == nil {
-		if err = yaml.Unmarshal(data, gh); err != nil {
-			return
-		}
+	var result string
+	if result, err = o.convertWorkflowsFromFilePath(args[0]); err == nil {
+		cmd.Println(result)
 	}
+	return
+}
 
+func (o *convertOption) convertWorkflowsFromFilePath(targetPath string) (result string, err error) {
 	var ghs []*pkg.Workflow
 	var files []string
-	if files, err = filepath.Glob(args[0]); err == nil {
-		ghs = make([]*pkg.Workflow, len(files))
-
+	if files, err = filepath.Glob(targetPath); err == nil {
 		for _, file := range files {
 			var data []byte
 			if data, err = os.ReadFile(file); err == nil {
@@ -52,13 +50,7 @@ func (o *convertOption) runE(cmd *cobra.Command, args []string) (err error) {
 			}
 			return
 		}
-	} else {
-		return
-	}
-
-	var result string
-	if result, err = o.convertWorkflows(ghs); err == nil {
-		cmd.Println(result)
+		result, err = o.convertWorkflows(ghs)
 	}
 	return
 }
