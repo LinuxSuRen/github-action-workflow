@@ -3,10 +3,21 @@
 # github-action-workflow
 GitHub Actions compatible workflows
 
+## Feature
+* Convert GitHub Workflows to Argo Workflows
+* Argo CD Config Management Plugin (CMP)
+
 ## Usage
+You can use it as a CLI:
 
 ```shell
 gaw convert .github/workflows/pull-request.yaml
+```
+
+you can install it via [hd](https://github.com/LinuxSuRen/http-downloader):
+
+```shell
+hd i gaw
 ```
 
 ## As CMP
