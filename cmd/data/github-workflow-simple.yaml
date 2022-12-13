@@ -1,0 +1,10 @@
+name: Build
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Test
+        run: |
+          go test ./... -coverprofile coverage.out
