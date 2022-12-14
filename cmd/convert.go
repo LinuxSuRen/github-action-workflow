@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"github.com/go-git/go-git/v5"
 	"github.com/linuxsuren/github-action-workflow/pkg"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
@@ -18,12 +19,26 @@ func newConvertCmd() (c *cobra.Command) {
 		Example: "gaw convert .github/workflows/build.yaml",
 		Short:   "Convert GitHub Actions workflow file to Argo Workflows",
 		Args:    cobra.MinimumNArgs(1),
+		PreRunE: opt.preRunE,
 		RunE:    opt.runE,
 	}
 
 	flags := c.Flags()
 	flags.StringToStringVarP(&opt.env, "env", "e", nil,
 		"Environment variables for all steps")
+	return
+}
+
+func (o *convertOption) preRunE(cmd *cobra.Command, args []string) (err error) {
+	var repo *git.Repository
+	if repo, err = git.PlainOpenWithOptions(".", &git.PlainOpenOptions{
+		DetectDotGit: true,
+	}); err == nil {
+		var remote *git.Remote
+		if remote, err = repo.Remote(git.DefaultRemoteName); err == nil {
+			o.gitRepository = remote.Config().URLs[0]
+		}
+	}
 	return
 }
 
@@ -42,7 +57,7 @@ func (o *convertOption) convertWorkflowsFromFilePath(targetPath string) (result 
 		for _, file := range files {
 			var data []byte
 			if data, err = os.ReadFile(file); err == nil {
-				gh := &pkg.Workflow{}
+				gh := &pkg.Workflow{GitRepository: o.gitRepository}
 				if err = yaml.Unmarshal(data, gh); err == nil {
 					ghs = append(ghs, gh)
 					continue
@@ -87,5 +102,6 @@ func (o *convertOption) convert(gh *pkg.Workflow) (output string, err error) {
 }
 
 type convertOption struct {
-	env map[string]string
+	env           map[string]string
+	gitRepository string
 }

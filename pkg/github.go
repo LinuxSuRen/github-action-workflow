@@ -3,6 +3,9 @@ package pkg
 type Workflow struct {
 	Name string
 	Jobs map[string]Job
+
+	// extra fields
+	GitRepository string
 }
 
 type Job struct {
