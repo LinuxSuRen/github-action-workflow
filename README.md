@@ -23,11 +23,14 @@ hd i gaw
 ## As CMP
 This repository could be [Config Management Plugin](https://argo-cd.readthedocs.io/en/stable/user-guide/config-management-plugins/#option-2-configure-plugin-via-sidecar) as well.
 
+First, please patch `argocd-repo-server` with the following snippet:
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: argocd-repo-server
+  namespace: argocd
 spec:
   template:
     spec:
@@ -50,3 +53,38 @@ spec:
         - mountPath: /home/argocd/cmp-server/plugins
           name: plugins
 ```
+
+then, create an Application on the Argo CD UI or CLI:
+
+```yaml
+kind: Application
+metadata:
+  name: yaml-readme
+  namespace: argocd
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: .github/workflows/                            # It will generate multiple Argo CD application manifests 
+                                                        # base on YAML files from this directory.
+                                                        # Please make sure the path ends with slash.
+    plugin: {}                                          # Argo CD will choose the corresponding CMP automatically
+    repoURL: https://gitee.com/linuxsuren/yaml-readme   # a sample project for discovering manifests
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      selfHeal: true
+```
+
+## Compatible
+Considering [GitHub Workflows](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsuses) 
+has a complex syntax. Currently, we support the following ones:
+
+* keyword `uses`
+  * support `actions/checkout`, `actions/setup-go`, `goreleaser/goreleaser-action` and `docker://`
+* keyword `run`
+* keyword `env`
+
+There are some limitations. For example, only the first job could be recognized in each file.

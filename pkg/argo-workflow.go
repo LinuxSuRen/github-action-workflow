@@ -25,7 +25,7 @@ func (w *Workflow) ConvertToArgoWorkflow() (output string, err error) {
 
 			if strings.HasPrefix(w.Jobs[i].Steps[j].Uses, "actions/checkout") {
 				w.Jobs[i].Steps[j].Image = "alpine/git:v2.26.2"
-				w.Jobs[i].Steps[j].Run = "git clone https://gitee.com/LinuxSuRen/yaml-readme ."
+				w.Jobs[i].Steps[j].Run = fmt.Sprintf("git clone %s .", w.GitRepository)
 			} else if strings.HasPrefix(w.Jobs[i].Steps[j].Uses, "actions/setup-go") {
 				defaultImage = "golang:1.19"
 

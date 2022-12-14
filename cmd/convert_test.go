@@ -259,3 +259,41 @@ func Test_convertOption_runE(t *testing.T) {
 		})
 	}
 }
+
+func Test_convertOption_preRunE(t *testing.T) {
+	type fields struct {
+		env           map[string]string
+		gitRepository string
+	}
+	type args struct {
+		cmd  *cobra.Command
+		args []string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		check   func(t *testing.T, opt *convertOption)
+		wantErr assert.ErrorAssertionFunc
+	}{{
+		name: "simple",
+		check: func(t *testing.T, opt *convertOption) {
+			assert.Contains(t, opt.gitRepository, "LinuxSuRen/github-action-workflow")
+		},
+		wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			assert.Nil(t, err)
+			return true
+		},
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := &convertOption{
+				env:           tt.fields.env,
+				gitRepository: tt.fields.gitRepository,
+			}
+			err := o.preRunE(tt.args.cmd, tt.args.args)
+			tt.check(t, o)
+			tt.wantErr(t, err, fmt.Sprintf("preRunE(%v, %v)", tt.args.cmd, tt.args.args))
+		})
+	}
+}

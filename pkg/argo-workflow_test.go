@@ -24,7 +24,7 @@ func TestWorkflow_ConvertToArgoWorkflow(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := &Workflow{}
+			w := &Workflow{GitRepository: "https://gitee.com/LinuxSuRen/yaml-readme"}
 			data, err := os.ReadFile(tt.githubActions)
 			assert.Nil(t, err)
 			err = yaml.Unmarshal(data, w)
