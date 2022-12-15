@@ -1,11 +1,62 @@
 package pkg
 
+import (
+	"gopkg.in/yaml.v2"
+)
+
 type Workflow struct {
 	Name string
+	On   interface{} // could be: string, []string, Event
 	Jobs map[string]Job
 
 	// extra fields
 	GitRepository string
+}
+
+func (w *Workflow) GetEventDetail(name string) (es *EventSource, err error) {
+	switch w.On.(type) {
+	case map[interface{}]interface{}:
+		raw := w.On.(map[interface{}]interface{})
+
+		if val, ok := raw[name]; ok {
+			var data []byte
+			if data, err = yaml.Marshal(val); err == nil {
+				es = &EventSource{}
+				err = yaml.Unmarshal(data, es)
+			}
+		}
+	}
+	return
+}
+
+func (w *Workflow) GetEvent() (result []string) {
+	switch w.On.(type) {
+	case string:
+		result = []string{w.On.(string)}
+	case []interface{}:
+		for _, item := range w.On.([]interface{}) {
+			result = append(result, item.(string))
+		}
+	case map[interface{}]interface{}:
+		for key := range w.On.(map[interface{}]interface{}) {
+			result = append(result, key.(string))
+		}
+	}
+	return
+}
+
+type Event struct {
+	Push        EventSource
+	PullRequest EventSource `yaml:"pull_request"`
+	Schedule    []string
+}
+
+type EventSource struct {
+	Branches       []string
+	Tags           []string
+	Paths          []string
+	PathsIgnore    []string `yaml:"paths-ignore"`
+	BranchesIgnore []string `yaml:"branches-ignore"`
 }
 
 type Job struct {
@@ -23,5 +74,7 @@ type Step struct {
 	ID   string
 
 	// extra fields
-	Image string
+	Image   string
+	Depends string
+	Secret  string
 }

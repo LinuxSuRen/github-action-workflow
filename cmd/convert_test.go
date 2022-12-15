@@ -187,6 +187,12 @@ metadata:
   name: build
 spec:
   entrypoint: main
+  arguments:
+    parameters:
+      - name: branch
+        default: master
+      - name: pr
+        default: -1
   volumeClaimTemplates:
     - metadata:
         name: work

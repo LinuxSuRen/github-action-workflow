@@ -4,6 +4,12 @@ metadata:
   name: build
 spec:
   entrypoint: main
+  arguments:
+    parameters:
+      - name: branch
+        default: master
+      - name: pr
+        default: -1
   volumeClaimTemplates:
     - metadata:
         name: work
@@ -21,14 +27,21 @@ spec:
             template: clone
           - name: test
             template: test
+            depends: clone
           - name: goreleaser
             template: goreleaser
+            depends: test
     - name: clone
       script:
         image: alpine/git:v2.26.2
         command: [sh]
         source: |
-          git clone https://gitee.com/LinuxSuRen/yaml-readme .
+          branch=$(echo {{workflow.parameters.branch}} | sed -e 's/refs\/heads\///g')
+          git clone --branch $branch https://gitee.com/LinuxSuRen/yaml-readme .
+          if [ {{workflow.parameters.pr}} != -1 ]; then
+            git fetch origin merge-requests/{{workflow.parameters.pr}}/head:mr-{{workflow.parameters.pr}}
+            git checkout  mr-{{workflow.parameters.pr}}
+          fi
         volumeMounts:
           - mountPath: /work
             name: work

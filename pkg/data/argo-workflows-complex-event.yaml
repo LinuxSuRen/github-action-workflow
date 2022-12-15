@@ -42,7 +42,7 @@ metadata:
   name: imagetest-push
 spec:
   event:
-    selector: payload.object_kind == "push" && payload.project.path_with_namespace endsWith ""
+    selector: payload.object_kind == "push" && payload.project.path_with_namespace endsWith "" && (payload.ref == "refs/heads/main" || payload.ref == "refs/heads/test")
   submit:
     workflowTemplateRef:
       name: imagetest
@@ -54,6 +54,99 @@ spec:
         - name: pr
           valueFrom:
             event: "-1"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: submit-workflow-template
+rules:
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workfloweventbindings
+    verbs:
+      - list
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflowtemplates
+    verbs:
+      - get
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflows
+    verbs:
+      - create
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: github.com
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: github.com
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: submit-workflow-template
+subjects:
+  - kind: ServiceAccount
+    name: github.com
+    namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gitlab.com
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gitlab.com
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: submit-workflow-template
+subjects:
+  - kind: ServiceAccount
+    name: gitlab.com
+    namespace: default
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: argo-workflows-webhook-clients
+stringData:
+  bitbucket.org: |
+    type: bitbucket
+  bitbucketserver: |
+    type: bitbucketserver
+  github.com: |
+    type: github
+  gitlab.com: |
+    type: gitlab
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowEventBinding
+metadata:
+  name: imagetest-merge_request
+spec:
+  event:
+    selector: payload.object_kind == "merge_request" && payload.project.path_with_namespace endsWith "" && (payload.object_attributes.target_branch == main) && payload.object_attributes.state == "opened"
+  submit:
+    workflowTemplateRef:
+      name: imagetest
+    arguments:
+      parameters:
+        - name: branch
+          valueFrom:
+            event: "payload.object_attributes.source_branch"
+        - name: pr
+          valueFrom:
+            event: "payload.object_attributes.iid"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
