@@ -18,6 +18,9 @@ spec:
         resources:
           requests:
             storage: 64Mi
+  synchronization:
+    mutex:
+      name: test
   templates:
     - name: main
       dag:

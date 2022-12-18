@@ -25,6 +25,10 @@ func TestWorkflow_ConvertToArgoWorkflow(t *testing.T) {
 		name:          "complex event",
 		githubActions: "data/github-action-complex-event.yaml",
 		argoWorkflows: "data/argo-workflows-complex-event.yaml",
+	}, {
+		name:          "with concurrency",
+		githubActions: "data/github-actions-concurrency.yaml",
+		argoWorkflows: "data/argo-workflows-concurrency.yaml",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
