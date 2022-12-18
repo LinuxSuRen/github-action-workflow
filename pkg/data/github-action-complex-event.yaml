@@ -1,6 +1,13 @@
 name: imageTest
 
-on: push
+on:
+  push:
+    branches:
+      - main
+      - test
+  merge_request:
+    branches:
+      - main
 
 jobs:
   imageTest:
