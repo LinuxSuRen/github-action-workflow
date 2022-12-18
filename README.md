@@ -82,9 +82,13 @@ spec:
 Considering [GitHub Workflows](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsuses) 
 has a complex syntax. Currently, we support the following ones:
 
+* [Event filter](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on)
+  * Support `on.push` and `on.merge_request`
 * keyword `uses`
   * support `actions/checkout`, `actions/setup-go`, `goreleaser/goreleaser-action` and `docker://`
 * keyword `run`
 * keyword `env`
+* [concurrency](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency)
+  * Not support `cancel-in-progress` yet
 
 There are some limitations. For example, only the first job could be recognized in each file.

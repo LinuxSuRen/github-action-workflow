@@ -1,0 +1,26 @@
+name: build
+concurrency: test
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up Go 1.18
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+        id: go
+      - name: clone
+        uses: actions/checkout@v3.0.0
+      - name: test
+        env:
+          GOPROXY: https://goproxy.io,direct
+        run: |
+          go test ./... -coverprofile coverage.out
+      - name: GoReleaser
+        uses: goreleaser/goreleaser-action@v2.9.1
+        env:
+          GOPROXY: https://goproxy.io,direct
+        with:
+          version: latest
+          args: release --skip-publish --rm-dist

@@ -258,7 +258,11 @@ spec:
         resources:
           requests:
             storage: 64Mi
-
+  {{- if .Concurrency}}
+  synchronization:
+    mutex:
+      name: {{.Concurrency}}
+  {{- end}}
   templates:
     - name: main
       dag:

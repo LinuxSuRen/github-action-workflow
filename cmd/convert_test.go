@@ -201,7 +201,6 @@ spec:
         resources:
           requests:
             storage: 64Mi
-
   templates:
     - name: main
       dag:

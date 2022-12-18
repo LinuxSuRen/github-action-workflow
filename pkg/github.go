@@ -5,9 +5,10 @@ import (
 )
 
 type Workflow struct {
-	Name string
-	On   interface{} // could be: string, []string, Event
-	Jobs map[string]Job
+	Name        string
+	On          interface{} // could be: string, []string, Event
+	Jobs        map[string]Job
+	Concurrency string
 
 	// extra fields
 	GitRepository string
