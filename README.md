@@ -83,7 +83,7 @@ Considering [GitHub Workflows](https://docs.github.com/en/actions/using-workflow
 has a complex syntax. Currently, we support the following ones:
 
 * [Event filter](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on)
-  * Support `on.push` and `on.merge_request`
+  * Support `on.push`, `on.schedule` and `on.merge_request`
 * keyword `uses`
   * support `actions/checkout`, `actions/setup-go`, `goreleaser/goreleaser-action` and `docker://`
 * keyword `run`

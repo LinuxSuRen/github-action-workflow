@@ -48,6 +48,8 @@ func (w *Workflow) GetWorkflowBindings() (wfbs []WorkflowEventBinding) {
 			binding.Parameters["branch"] = "payload.object_attributes.source_branch"
 			binding.Parameters["pr"] = "payload.object_attributes.iid"
 			binding.Selector = binding.Selector + ` && payload.object_attributes.state == "opened"`
+		default:
+			continue
 		}
 		wfbs = append(wfbs, binding)
 	}
@@ -129,6 +131,20 @@ fi`, w.GitRepository)
 		t, err = template.New("argo").Funcs(sprig.FuncMap()).Parse(argoworkflowEventBinding)
 		data := bytes.NewBuffer([]byte{})
 		if err = t.Execute(data, binding); err == nil {
+			output = output + "\n---\n" + strings.TrimSpace(data.String())
+		}
+	}
+
+	// generate cronWorkflow
+	var schedules []Schedule
+	schedules, err = w.GetSchedules()
+	for _, schedule := range schedules {
+		if t, err = template.New("argo").Funcs(sprig.FuncMap()).Parse(cronWorkflowTemplate); err != nil {
+			return
+		}
+		data := bytes.NewBuffer([]byte{})
+		w.Cron = schedule.Cron
+		if err = t.Execute(data, w); err == nil {
 			output = output + "\n---\n" + strings.TrimSpace(data.String())
 		}
 	}
@@ -236,6 +252,53 @@ stringData:
     type: github
   gitlab.com: |
     type: gitlab`
+
+var cronWorkflowTemplate = `
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: {{.Name}}
+spec:
+  schedule: "{{.Cron}}"
+  concurrencyPolicy: "Replace"
+  startingDeadlineSeconds: 0
+  workflowSpec:
+    entrypoint: main
+    templates:
+      - name: main
+        dag:
+          tasks:
+        {{- range $key, $job := .Jobs}}
+        {{- range $i, $step := $job.Steps}}
+        {{- if $step.Image}}
+            - name: {{$step.Name}}
+              template: {{$step.Name}}
+              {{- if $step.Depends}}
+              depends: {{$step.Depends}}
+              {{- end}}
+        {{- end}}
+        {{- end}}
+        {{- end}}
+
+      {{- range $key, $job := .Jobs}}
+      {{- range $i, $step := $job.Steps}}
+      {{- if $step.Image}}
+      - name: {{$step.Name}}
+        script:
+          image: {{$step.Image}}
+          command: [sh]
+          {{- if $step.Env}}
+          env:
+          {{- range $k, $v := $step.Env}}
+            - name: {{$k}}
+              value: {{$v}}
+          {{- end}}
+          {{- end}}
+          source: |
+{{indent 12 $step.Run}}
+        {{- end}}
+        {{- end}}
+        {{- end}}`
 
 var argoworkflowTemplate = `
 apiVersion: argoproj.io/v1alpha1
