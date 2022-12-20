@@ -46,4 +46,20 @@ on:
 		PathsIgnore:    []string{"/bin"},
 		BranchesIgnore: []string{"bugfix"},
 	}, *es)
+
+	// schedule
+	wf = &Workflow{}
+	err = yaml.Unmarshal([]byte(`on:
+  schedule:
+    - cron: '30 5 * * 1,3'
+    - cron: '30 5 * * 2,4'`), wf)
+	assert.Nil(t, err)
+	var schedules []Schedule
+	schedules, err = wf.GetSchedules()
+	assert.Nil(t, err)
+	assert.EqualValues(t, []Schedule{{
+		Cron: "30 5 * * 1,3",
+	}, {
+		Cron: "30 5 * * 2,4",
+	}}, schedules)
 }

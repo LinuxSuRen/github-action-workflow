@@ -12,18 +12,37 @@ type Workflow struct {
 
 	// extra fields
 	GitRepository string
+	Cron          string
 }
 
 func (w *Workflow) GetEventDetail(name string) (es *EventSource, err error) {
+	if name != "schedule" {
+		switch w.On.(type) {
+		case map[interface{}]interface{}:
+			raw := w.On.(map[interface{}]interface{})
+
+			if val, ok := raw[name]; ok {
+				var data []byte
+				if data, err = yaml.Marshal(val); err == nil {
+					es = &EventSource{}
+					err = yaml.Unmarshal(data, es)
+				}
+			}
+		}
+	}
+	return
+}
+
+func (w *Workflow) GetSchedules() (schedules []Schedule, err error) {
 	switch w.On.(type) {
 	case map[interface{}]interface{}:
 		raw := w.On.(map[interface{}]interface{})
 
-		if val, ok := raw[name]; ok {
+		if val, ok := raw["schedule"]; ok {
 			var data []byte
 			if data, err = yaml.Marshal(val); err == nil {
-				es = &EventSource{}
-				err = yaml.Unmarshal(data, es)
+				schedules = []Schedule{}
+				err = yaml.Unmarshal(data, &schedules)
 			}
 		}
 	}
@@ -58,6 +77,10 @@ type EventSource struct {
 	Paths          []string
 	PathsIgnore    []string `yaml:"paths-ignore"`
 	BranchesIgnore []string `yaml:"branches-ignore"`
+}
+
+type Schedule struct {
+	Cron string
 }
 
 type Job struct {
