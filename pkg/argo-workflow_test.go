@@ -1,10 +1,11 @@
 package pkg
 
 import (
-	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
 )
 
 func TestWorkflow_ConvertToArgoWorkflow(t *testing.T) {
@@ -53,4 +54,10 @@ func TestWorkflow_ConvertToArgoWorkflow(t *testing.T) {
 			assert.Equal(t, string(wantData), gotOutput)
 		})
 	}
+
+	// workflow name is empty
+	wf := &Workflow{}
+	result, err := wf.ConvertToArgoWorkflow()
+	assert.Equal(t, "", result)
+	assert.Nil(t, err)
 }

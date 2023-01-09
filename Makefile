@@ -9,6 +9,6 @@ copy: build
 test-gh:
 	act -W pkg/data/ -j imageTest
 image:
-	docker build . -t ghcr.io/linuxsuren/github-action-workflow:dev
+	docker build . -t ghcr.io/linuxsuren/github-action-workflow:dev --build-arg GOPROXY=https://goproxy.io,direct
 image-push: image
 	docker push ghcr.io/linuxsuren/github-action-workflow:dev

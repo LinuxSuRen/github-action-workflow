@@ -3,9 +3,10 @@ package pkg
 import (
 	"bytes"
 	"fmt"
-	"github.com/Masterminds/sprig"
 	"strings"
 	"text/template"
+
+	"github.com/Masterminds/sprig"
 )
 
 func k8sStyleName(name string) (result string) {
@@ -66,6 +67,11 @@ func getBranchSelector(eventName, branch string) string {
 }
 
 func (w *Workflow) ConvertToArgoWorkflow() (output string, err error) {
+	if w.Name == "" {
+		// name is required
+		return
+	}
+
 	// pre-handle
 	defaultImage := "alpine"
 	w.Name = k8sStyleName(w.Name)
@@ -120,7 +126,9 @@ fi`, w.GitRepository)
 
 	// generate workflowTemplate
 	var t *template.Template
-	t, err = template.New("argo").Funcs(sprig.FuncMap()).Parse(argoworkflowTemplate)
+	if t, err = template.New("argo").Funcs(sprig.GenericFuncMap()).Parse(argoworkflowTemplate); err != nil {
+		return
+	}
 	data := bytes.NewBuffer([]byte{})
 	if err = t.Execute(data, w); err == nil {
 		output = strings.TrimSpace(data.String())
@@ -128,7 +136,9 @@ fi`, w.GitRepository)
 
 	// generate workflowEventBinding
 	for _, binding := range w.GetWorkflowBindings() {
-		t, err = template.New("argo").Funcs(sprig.FuncMap()).Parse(argoworkflowEventBinding)
+		if t, err = template.New("argo").Funcs(sprig.GenericFuncMap()).Parse(argoworkflowEventBinding); err != nil {
+			return
+		}
 		data := bytes.NewBuffer([]byte{})
 		if err = t.Execute(data, binding); err == nil {
 			output = output + "\n---\n" + strings.TrimSpace(data.String())
@@ -139,7 +149,7 @@ fi`, w.GitRepository)
 	var schedules []Schedule
 	schedules, err = w.GetSchedules()
 	for _, schedule := range schedules {
-		if t, err = template.New("argo").Funcs(sprig.FuncMap()).Parse(cronWorkflowTemplate); err != nil {
+		if t, err = template.New("argo").Funcs(sprig.GenericFuncMap()).Parse(cronWorkflowTemplate); err != nil {
 			return
 		}
 		data := bytes.NewBuffer([]byte{})
