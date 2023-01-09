@@ -1,8 +1,9 @@
 module github.com/linuxsuren/github-action-workflow
 
-go 1.19
+go 1.18
 
 require (
+	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/go-git/go-git/v5 v5.5.1
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.1
@@ -13,7 +14,6 @@ require (
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
-	github.com/Masterminds/sprig v2.22.0+incompatible // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20221026131551-cf6655e29de4 // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
