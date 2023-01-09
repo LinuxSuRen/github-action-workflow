@@ -1,9 +1,10 @@
 FROM golang:1.19 as builder
 
+ARG GOPROXY=direct
 WORKDIR /workspace
 COPY . .
 RUN go mod download
-RUN CGO_ENABLE=0 go build -ldflags "-w -s" -o gaw
+RUN GOPROXY=${GOPROXY} CGO_ENABLE=0 go build -ldflags "-w -s" -o gaw
 
 FROM ubuntu:kinetic
 

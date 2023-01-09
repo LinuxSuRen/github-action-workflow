@@ -126,7 +126,9 @@ fi`, w.GitRepository)
 
 	// generate workflowTemplate
 	var t *template.Template
-	t, err = template.New("argo").Funcs(sprig.GenericFuncMap()).Parse(argoworkflowTemplate)
+	if t, err = template.New("argo").Funcs(sprig.GenericFuncMap()).Parse(argoworkflowTemplate); err != nil {
+		return
+	}
 	data := bytes.NewBuffer([]byte{})
 	if err = t.Execute(data, w); err == nil {
 		output = strings.TrimSpace(data.String())

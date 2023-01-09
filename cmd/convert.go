@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/go-git/go-git/v5"
 	"github.com/linuxsuren/github-action-workflow/pkg"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
 	"gopkg.in/yaml.v2"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 func newConvertCmd() (c *cobra.Command) {
@@ -75,7 +76,7 @@ func (o *convertOption) convertWorkflows(ghs []*pkg.Workflow) (output string, er
 
 	var result string
 	for i := range ghs {
-		if result, err = o.convert(ghs[i]); err != nil {
+		if result, err = o.convert(ghs[i]); err != nil || result == "" {
 			return
 		}
 
