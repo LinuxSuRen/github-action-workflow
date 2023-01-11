@@ -98,8 +98,20 @@ func (o *convertOption) convert(gh *pkg.Workflow) (output string, err error) {
 		}
 	}
 
+	o.preHandle(gh)
+
 	output, err = gh.ConvertToArgoWorkflow()
 	return
+}
+
+func (o *convertOption) preHandle(gh *pkg.Workflow) {
+	if gh.Name == "" {
+		return
+	}
+
+	if prefix, ok := o.env["prefix"]; ok && prefix != "" {
+		gh.Name = prefix + gh.Name
+	}
 }
 
 type convertOption struct {

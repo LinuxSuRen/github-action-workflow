@@ -83,8 +83,15 @@ spec:
     repoURL: https://gitee.com/devops-ws/learn-pipeline-go
     path: kustomize
     targetRevision: HEAD
+    plugin:
+      env:
+        - name: prefix
+          value: dev-
   syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
     automated:
+      prune: true
       selfHeal: true
 EOF
 ```
@@ -107,7 +114,28 @@ spec:
     repoURL: https://gitee.com/linuxsuren/yaml-readme
     targetRevision: HEAD
   syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
     automated:
+      prune: true
       selfHeal: true
 EOF
+```
+
+```yaml
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Test
+        run: |
+          echo hello world!
 ```

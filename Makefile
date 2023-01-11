@@ -10,5 +10,5 @@ test-gh:
 	act -W pkg/data/ -j imageTest
 image:
 	docker build . -t ghcr.io/linuxsuren/github-action-workflow:dev --build-arg GOPROXY=https://goproxy.io,direct
-image-push: image
+push-image: image
 	docker push ghcr.io/linuxsuren/github-action-workflow:dev
