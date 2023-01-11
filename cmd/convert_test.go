@@ -3,11 +3,12 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/linuxsuren/github-action-workflow/pkg"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 func TestCmdConvert(t *testing.T) {
@@ -301,4 +302,29 @@ func Test_convertOption_preRunE(t *testing.T) {
 			tt.wantErr(t, err, fmt.Sprintf("preRunE(%v, %v)", tt.args.cmd, tt.args.args))
 		})
 	}
+}
+
+func TestPreHandle(t *testing.T) {
+	opt := &convertOption{
+		env: map[string]string{
+			"prefix": "dev-",
+		},
+	}
+	wfWithoutName := &pkg.Workflow{}
+	opt.preHandle(wfWithoutName)
+	assert.Empty(t, wfWithoutName.Name)
+
+	wf := &pkg.Workflow{
+		Name: "sample",
+	}
+	opt.preHandle(wf)
+	assert.Equal(t, "dev-sample", wf.Name)
+
+	// empty option
+	emptyOpt := &convertOption{}
+	sampleWf := &pkg.Workflow{
+		Name: "sample",
+	}
+	emptyOpt.preHandle(sampleWf)
+	assert.Equal(t, "sample", sampleWf.Name)
 }
