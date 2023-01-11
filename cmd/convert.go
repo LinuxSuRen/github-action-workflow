@@ -40,7 +40,27 @@ func (o *convertOption) preRunE(cmd *cobra.Command, args []string) (err error) {
 			o.gitRepository = remote.Config().URLs[0]
 		}
 	}
+
+	// find environment variables
+	o.parseEnv()
 	return
+}
+
+func (o *convertOption) parseEnv() {
+	if o.env == nil {
+		o.env = map[string]string{}
+	}
+
+	for _, env := range os.Environ() {
+		if strings.HasPrefix(env, "ARGOCD_ENV_") {
+			env = strings.TrimPrefix(env, "ARGOCD_ENV_")
+
+			pairs := strings.Split(env, "=")
+			if len(pairs) == 2 {
+				o.env[pairs[0]] = pairs[1]
+			}
+		}
+	}
 }
 
 func (o *convertOption) runE(cmd *cobra.Command, args []string) (err error) {
