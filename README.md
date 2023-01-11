@@ -56,7 +56,9 @@ spec:
 
 then, create an Application on the Argo CD UI or CLI:
 
-```yaml
+```shell
+cat <<EOF | kubectl apply -f -
+apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: yaml-readme
@@ -76,6 +78,7 @@ spec:
   syncPolicy:
     automated:
       selfHeal: true
+EOF
 ```
 
 ## Compatible

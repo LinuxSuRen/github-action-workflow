@@ -7,5 +7,5 @@ spec:
   generate:
     command: [gaw, convert, '*.yaml']
   discover:
-    fileName: "*.yaml"
+    fileName: ".gaw"
   lockRepo: true
