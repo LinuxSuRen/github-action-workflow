@@ -328,3 +328,10 @@ func TestPreHandle(t *testing.T) {
 	emptyOpt.preHandle(sampleWf)
 	assert.Equal(t, "sample", sampleWf.Name)
 }
+
+func TestParseEnv(t *testing.T) {
+	opt := &convertOption{}
+	os.Setenv("ARGOCD_ENV_prefix", "dev-")
+	opt.parseEnv()
+	assert.EqualValues(t, map[string]string{"prefix": "dev-"}, opt.env)
+}
