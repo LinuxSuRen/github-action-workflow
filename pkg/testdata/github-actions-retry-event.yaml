@@ -1,0 +1,13 @@
+name: imageTest
+
+on: retry
+
+jobs:
+  imageTest:
+    name: build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: test
+        uses: docker://alpine:3.8
+        with:
+          args: echo 1

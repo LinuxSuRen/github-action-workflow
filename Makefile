@@ -3,7 +3,8 @@ build:
 test:
 	go test ./...
 pre-commit: test build
-
+install-pre-commit:
+	cp .github/pre-commit .git/hooks/pre-commit
 copy: build
 	cp bin/gaw /usr/local/bin
 test-gh:
