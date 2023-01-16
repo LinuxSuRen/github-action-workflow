@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowEventBinding
+metadata:
+  name: {{.Name}}
+spec:
+  event:
+    selector: {{.Selector}}
+  submit:
+    workflowTemplateRef:
+      name: {{.Ref}}
+   {{- if .Parameters}}
+    arguments:
+      parameters:
+       {{- range $key, $val := .Parameters}}
+        - name: {{$key}}
+          valueFrom:
+            event: "{{$val}}"
+        {{- end}}
+	{{- end}}

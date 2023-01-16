@@ -16,24 +16,28 @@ func TestWorkflow_ConvertToArgoWorkflow(t *testing.T) {
 		wantErr       bool
 	}{{
 		name:          "simple",
-		githubActions: "data/github-actions.yaml",
-		argoWorkflows: "data/argo-workflows.yaml",
+		githubActions: "testdata/github-actions.yaml",
+		argoWorkflows: "testdata/argo-workflows.yaml",
 	}, {
 		name:          "with image",
-		githubActions: "data/github-action-image.yaml",
-		argoWorkflows: "data/argo-workflows-image.yaml",
+		githubActions: "testdata/github-action-image.yaml",
+		argoWorkflows: "testdata/argo-workflows-image.yaml",
 	}, {
 		name:          "complex event",
-		githubActions: "data/github-action-complex-event.yaml",
-		argoWorkflows: "data/argo-workflows-complex-event.yaml",
+		githubActions: "testdata/github-action-complex-event.yaml",
+		argoWorkflows: "testdata/argo-workflows-complex-event.yaml",
 	}, {
 		name:          "with concurrency",
-		githubActions: "data/github-actions-concurrency.yaml",
-		argoWorkflows: "data/argo-workflows-concurrency.yaml",
+		githubActions: "testdata/github-actions-concurrency.yaml",
+		argoWorkflows: "testdata/argo-workflows-concurrency.yaml",
 	}, {
 		name:          "with schedule",
-		githubActions: "data/github-actions-schedule.yaml",
-		argoWorkflows: "data/argo-workflows-schedule.yaml",
+		githubActions: "testdata/github-actions-schedule.yaml",
+		argoWorkflows: "testdata/argo-workflows-schedule.yaml",
+	}, {
+		name:          "with retry event",
+		githubActions: "testdata/github-actions-retry-event.yaml",
+		argoWorkflows: "testdata/argo-workflows-retry-event.yaml",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -51,7 +55,7 @@ func TestWorkflow_ConvertToArgoWorkflow(t *testing.T) {
 
 			wantData, err := os.ReadFile(tt.argoWorkflows)
 			assert.Nil(t, err)
-			assert.Equal(t, string(wantData), gotOutput)
+			assert.Equalf(t, string(wantData), gotOutput, gotOutput)
 		})
 	}
 

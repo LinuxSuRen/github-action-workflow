@@ -1,0 +1,76 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: {{.Name}}
+spec:
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: branch
+        default: master
+      - name: pr
+        default: -1
+  volumeClaimTemplates:
+    - metadata:
+        name: work
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 64Mi
+  {{- if .Concurrency}}
+  synchronization:
+    mutex:
+      name: {{.Concurrency}}
+  {{- end}}
+  templates:
+    - name: main
+      dag:
+        tasks:
+      {{- range $key, $job := .Jobs}}
+      {{- range $i, $step := $job.Steps}}
+      {{- if $step.Image}}
+          - name: {{$step.Name}}
+            template: {{$step.Name}}
+            {{- if $step.Depends}}
+            depends: {{$step.Depends}}
+            {{- end}}
+      {{- end}}
+      {{- end}}
+      {{- end}}
+
+      {{- range $key, $job := .Jobs}}
+      {{- range $i, $step := $job.Steps}}
+      {{- if $step.Image}}
+    - name: {{$step.Name}}
+      {{- if $step.Secret}}
+      volumes:
+        - name: {{$step.Secret}}
+          secret:
+            defaultMode: 0400
+            secretName: {{$step.Secret}}
+      {{- end}}
+      script:
+        image: {{$step.Image}}
+        command: [sh]
+        {{- if $step.Env}}
+        env:
+        {{- range $k, $v := $step.Env}}
+          - name: {{$k}}
+            value: {{$v}}
+        {{- end}}
+        {{- end}}
+        source: |
+{{indent 10 $step.Run}}
+        volumeMounts:
+          - mountPath: /work
+            name: work
+        {{- if $step.Secret}}
+          - mountPath: /root/.ssh/
+            name: {{$step.Secret}}
+        {{- end}}
+        workingDir: /work
+      {{- end}}
+      {{- end}}
+      {{- end}}

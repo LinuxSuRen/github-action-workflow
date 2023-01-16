@@ -1,0 +1,46 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: {{.Name}}
+spec:
+  schedule: "{{.Cron}}"
+  concurrencyPolicy: "Replace"
+  startingDeadlineSeconds: 0
+  workflowSpec:
+    entrypoint: main
+    templates:
+      - name: main
+        dag:
+          tasks:
+        {{- range $key, $job := .Jobs}}
+        {{- range $i, $step := $job.Steps}}
+        {{- if $step.Image}}
+            - name: {{$step.Name}}
+              template: {{$step.Name}}
+              {{- if $step.Depends}}
+              depends: {{$step.Depends}}
+              {{- end}}
+        {{- end}}
+        {{- end}}
+        {{- end}}
+
+      {{- range $key, $job := .Jobs}}
+      {{- range $i, $step := $job.Steps}}
+      {{- if $step.Image}}
+      - name: {{$step.Name}}
+        script:
+          image: {{$step.Image}}
+          command: [sh]
+          {{- if $step.Env}}
+          env:
+          {{- range $k, $v := $step.Env}}
+            - name: {{$k}}
+              value: {{$v}}
+          {{- end}}
+          {{- end}}
+          source: |
+{{indent 12 $step.Run}}
+        {{- end}}
+        {{- end}}
+        {{- end}}

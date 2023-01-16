@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/linuxsuren/github-action-workflow/pkg"
@@ -284,7 +285,7 @@ func Test_convertOption_preRunE(t *testing.T) {
 	}{{
 		name: "simple",
 		check: func(t *testing.T, opt *convertOption) {
-			assert.Contains(t, opt.gitRepository, "LinuxSuRen/github-action-workflow")
+			assert.Contains(t, strings.ToLower(opt.gitRepository), "linuxsuren/github-action-workflow")
 		},
 		wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 			assert.Nil(t, err)

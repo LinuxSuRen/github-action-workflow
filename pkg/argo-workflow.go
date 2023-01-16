@@ -23,8 +23,10 @@ func (w *Workflow) GetWorkflowBindings() (wfbs []WorkflowEventBinding) {
 	}
 
 	for _, e := range w.GetEvent() {
+		projectSelector := fmt.Sprintf(`payload.project.path_with_namespace endsWith "%s"`, projectName)
+
 		binding := WorkflowEventBinding{
-			Selector:   fmt.Sprintf(`payload.object_kind == "%s" && payload.project.path_with_namespace endsWith "%s"`, e, projectName),
+			Selector:   fmt.Sprintf(`payload.object_kind == "%s" && %s`, e, projectSelector),
 			Ref:        w.Name,
 			Name:       fmt.Sprintf("%s-%s", w.Name, e),
 			Parameters: map[string]string{},
@@ -49,6 +51,10 @@ func (w *Workflow) GetWorkflowBindings() (wfbs []WorkflowEventBinding) {
 			binding.Parameters["branch"] = "payload.object_attributes.source_branch"
 			binding.Parameters["pr"] = "payload.object_attributes.iid"
 			binding.Selector = binding.Selector + ` && payload.object_attributes.state == "opened"`
+		case "retry":
+			binding.Parameters["branch"] = "payload.object_attributes.source_branch"
+			binding.Parameters["pr"] = "payload.merge_request.iid"
+			binding.Selector = fmt.Sprintf(`payload.event_type == "note" && payload.merge_request.state == "opened" && payload.object_attributes.note == "/retry" && %s`, projectSelector)
 		default:
 			continue
 		}
@@ -145,6 +151,15 @@ fi`, w.GitRepository)
 		}
 	}
 
+	if len(w.GetWorkflowBindings()) > 0 {
+		output = output + "\n---\n" + strings.TrimSpace(eventBindingRole)
+		output = output + "\n---\n" + strings.TrimSpace(eventBindingGitHubServiceAccount)
+		output = output + "\n---\n" + strings.TrimSpace(eventBindingGitHubRoleBinding)
+		output = output + "\n---\n" + strings.TrimSpace(eventBindingGitlabServiceAccount)
+		output = output + "\n---\n" + strings.TrimSpace(eventBindingGitlabRoleBinding)
+		output = output + "\n---\n" + strings.TrimSpace(eventBindingSecret)
+	}
+
 	// generate cronWorkflow
 	var schedules []Schedule
 	schedules, err = w.GetSchedules()
@@ -167,223 +182,3 @@ type WorkflowEventBinding struct {
 	Selector   string
 	Parameters map[string]string
 }
-
-var argoworkflowEventBinding = `
-apiVersion: argoproj.io/v1alpha1
-kind: WorkflowEventBinding
-metadata:
-  name: {{.Name}}
-spec:
-  event:
-    selector: {{.Selector}}
-  submit:
-    workflowTemplateRef:
-      name: {{.Ref}}
-   {{- if .Parameters}}
-    arguments:
-      parameters:
-       {{- range $key, $val := .Parameters}}
-        - name: {{$key}}
-          valueFrom:
-            event: "{{$val}}"
-        {{- end}}
-	{{- end}}
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: submit-workflow-template
-rules:
-  - apiGroups:
-      - argoproj.io
-    resources:
-      - workfloweventbindings
-    verbs:
-      - list
-  - apiGroups:
-      - argoproj.io
-    resources:
-      - workflowtemplates
-    verbs:
-      - get
-  - apiGroups:
-      - argoproj.io
-    resources:
-      - workflows
-    verbs:
-      - create
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: github.com
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: github.com
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: submit-workflow-template
-subjects:
-  - kind: ServiceAccount
-    name: github.com
-    namespace: default
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: gitlab.com
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: gitlab.com
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: submit-workflow-template
-subjects:
-  - kind: ServiceAccount
-    name: gitlab.com
-    namespace: default
----
-kind: Secret
-apiVersion: v1
-metadata:
-  name: argo-workflows-webhook-clients
-stringData:
-  bitbucket.org: |
-    type: bitbucket
-  bitbucketserver: |
-    type: bitbucketserver
-  github.com: |
-    type: github
-  gitlab.com: |
-    type: gitlab`
-
-var cronWorkflowTemplate = `
-apiVersion: argoproj.io/v1alpha1
-kind: CronWorkflow
-metadata:
-  name: {{.Name}}
-spec:
-  schedule: "{{.Cron}}"
-  concurrencyPolicy: "Replace"
-  startingDeadlineSeconds: 0
-  workflowSpec:
-    entrypoint: main
-    templates:
-      - name: main
-        dag:
-          tasks:
-        {{- range $key, $job := .Jobs}}
-        {{- range $i, $step := $job.Steps}}
-        {{- if $step.Image}}
-            - name: {{$step.Name}}
-              template: {{$step.Name}}
-              {{- if $step.Depends}}
-              depends: {{$step.Depends}}
-              {{- end}}
-        {{- end}}
-        {{- end}}
-        {{- end}}
-
-      {{- range $key, $job := .Jobs}}
-      {{- range $i, $step := $job.Steps}}
-      {{- if $step.Image}}
-      - name: {{$step.Name}}
-        script:
-          image: {{$step.Image}}
-          command: [sh]
-          {{- if $step.Env}}
-          env:
-          {{- range $k, $v := $step.Env}}
-            - name: {{$k}}
-              value: {{$v}}
-          {{- end}}
-          {{- end}}
-          source: |
-{{indent 12 $step.Run}}
-        {{- end}}
-        {{- end}}
-        {{- end}}`
-
-var argoworkflowTemplate = `
-apiVersion: argoproj.io/v1alpha1
-kind: WorkflowTemplate
-metadata:
-  name: {{.Name}}
-spec:
-  entrypoint: main
-  arguments:
-    parameters:
-      - name: branch
-        default: master
-      - name: pr
-        default: -1
-  volumeClaimTemplates:
-    - metadata:
-        name: work
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 64Mi
-  {{- if .Concurrency}}
-  synchronization:
-    mutex:
-      name: {{.Concurrency}}
-  {{- end}}
-  templates:
-    - name: main
-      dag:
-        tasks:
-      {{- range $key, $job := .Jobs}}
-      {{- range $i, $step := $job.Steps}}
-      {{- if $step.Image}}
-          - name: {{$step.Name}}
-            template: {{$step.Name}}
-            {{- if $step.Depends}}
-            depends: {{$step.Depends}}
-            {{- end}}
-      {{- end}}
-      {{- end}}
-      {{- end}}
-
-      {{- range $key, $job := .Jobs}}
-      {{- range $i, $step := $job.Steps}}
-      {{- if $step.Image}}
-    - name: {{$step.Name}}
-      {{- if $step.Secret}}
-      volumes:
-        - name: {{$step.Secret}}
-          secret:
-            defaultMode: 0400
-            secretName: {{$step.Secret}}
-      {{- end}}
-      script:
-        image: {{$step.Image}}
-        command: [sh]
-        {{- if $step.Env}}
-        env:
-        {{- range $k, $v := $step.Env}}
-          - name: {{$k}}
-            value: {{$v}}
-        {{- end}}
-        {{- end}}
-        source: |
-{{indent 10 $step.Run}}
-        volumeMounts:
-          - mountPath: /work
-            name: work
-        {{- if $step.Secret}}
-          - mountPath: /root/.ssh/
-            name: {{$step.Secret}}
-        {{- end}}
-        workingDir: /work
-      {{- end}}
-      {{- end}}
-      {{- end}}
-`
