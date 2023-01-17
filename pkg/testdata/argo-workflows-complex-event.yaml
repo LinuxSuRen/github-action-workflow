@@ -57,7 +57,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowEventBinding
 metadata:
-  name: imagetest-merge_request
+  name: imagetest-merge-request
 spec:
   event:
     selector: payload.object_kind == "merge_request" && payload.project.path_with_namespace endsWith "" && (payload.object_attributes.target_branch == main) && payload.object_attributes.state == "opened"
