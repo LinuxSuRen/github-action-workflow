@@ -28,7 +28,7 @@ func (w *Workflow) GetWorkflowBindings() (wfbs []WorkflowEventBinding) {
 		binding := WorkflowEventBinding{
 			Selector:   fmt.Sprintf(`payload.object_kind == "%s" && %s`, e, projectSelector),
 			Ref:        w.Name,
-			Name:       fmt.Sprintf("%s-%s", w.Name, e),
+			Name:       fmt.Sprintf("%s-%s", w.Name, strings.ReplaceAll(e, "_", "-")),
 			Parameters: map[string]string{},
 		}
 		// read more about the expression from https://github.com/antonmedv/expr
