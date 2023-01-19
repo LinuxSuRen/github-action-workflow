@@ -36,10 +36,11 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: true
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2.9.1
+        uses: goreleaser/goreleaser-action@v4.1.1
         with:
-          version: latest
-          args: release --skip-publish --rm-dist
+          github_token: ${{ secrets.GH_PUBLISH_SECRETS }}
+          version: v1.14.0
+          args: release --skip-publish --rm-dist --snapshot
 
   build-image:
     name: Build Image

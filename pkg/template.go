@@ -23,8 +23,14 @@ var eventBindingGitlabRoleBinding string
 //go:embed data/gitlab/serviceaccount.yaml
 var eventBindingGitlabServiceAccount string
 
+//go:embed data/gitlab/secret_gitlab.com.yaml
+var eventBindingGitlabServiceAccountSecret string
+
 //go:embed data/github/rolebinding.yaml
 var eventBindingGitHubRoleBinding string
 
 //go:embed data/github/serviceaccount.yaml
 var eventBindingGitHubServiceAccount string
+
+//go:embed data/github/secret_github.com.yaml
+var eventBindingGitHubServiceAccountSecret string

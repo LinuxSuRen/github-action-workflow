@@ -14,6 +14,8 @@ func TestTemplateIsNotEmpty(t *testing.T) {
 	assert.NotEmpty(t, eventBindingSecret)
 	assert.NotEmpty(t, eventBindingGitlabRoleBinding)
 	assert.NotEmpty(t, eventBindingGitlabServiceAccount)
+	assert.NotEmpty(t, eventBindingGitlabServiceAccountSecret)
 	assert.NotEmpty(t, eventBindingGitHubRoleBinding)
 	assert.NotEmpty(t, eventBindingGitHubServiceAccount)
+	assert.NotEmpty(t, eventBindingGitHubServiceAccountSecret)
 }

@@ -115,6 +115,14 @@ subjects:
     name: github.com
     namespace: default
 ---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: github.com.service-account-token
+  annotations:
+    kubernetes.io/service-account.name: github.com
+type: kubernetes.io/service-account-token
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -132,6 +140,14 @@ subjects:
   - kind: ServiceAccount
     name: gitlab.com
     namespace: default
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: gitlab.com.service-account-token
+  annotations:
+    kubernetes.io/service-account.name: gitlab.com
+type: kubernetes.io/service-account-token
 ---
 kind: Secret
 apiVersion: v1
