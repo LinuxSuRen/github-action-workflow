@@ -121,9 +121,13 @@ metadata:
 stringData:
   bitbucket.org: |
     type: bitbucket
+    secret: argo-workflow-secret
   bitbucketserver: |
     type: bitbucketserver
+    secret: argo-workflow-secret
   github.com: |
     type: github
+    secret: argo-workflow-secret
   gitlab.com: |
     type: gitlab
+    secret: argo-workflow-secret
