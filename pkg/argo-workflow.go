@@ -68,7 +68,7 @@ func getBranchSelector(eventName, branch string) string {
 	case "push":
 		return fmt.Sprintf(`payload.ref == "refs/heads/%s" || `, branch)
 	default: // it should be merge_request
-		return fmt.Sprintf("payload.object_attributes.target_branch == %s || ", branch)
+		return fmt.Sprintf(`payload.object_attributes.target_branch == "%s" || `, branch)
 	}
 }
 
