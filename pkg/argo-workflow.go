@@ -155,8 +155,10 @@ fi`, w.GitRepository)
 		output = output + "\n---\n" + strings.TrimSpace(eventBindingRole)
 		output = output + "\n---\n" + strings.TrimSpace(eventBindingGitHubServiceAccount)
 		output = output + "\n---\n" + strings.TrimSpace(eventBindingGitHubRoleBinding)
+		output = output + "\n---\n" + strings.TrimSpace(eventBindingGitHubServiceAccountSecret)
 		output = output + "\n---\n" + strings.TrimSpace(eventBindingGitlabServiceAccount)
 		output = output + "\n---\n" + strings.TrimSpace(eventBindingGitlabRoleBinding)
+		output = output + "\n---\n" + strings.TrimSpace(eventBindingGitlabServiceAccountSecret)
 		output = output + "\n---\n" + strings.TrimSpace(eventBindingSecret)
 	}
 

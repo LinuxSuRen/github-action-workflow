@@ -22,8 +22,9 @@ jobs:
         with:
           go-version: 1.19
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2.9.1
+        uses: goreleaser/goreleaser-action@v4.1.1
         with:
+          github_token: ${{ secrets.GH_PUBLISH_SECRETS }}
           version: latest
           args: release --rm-dist
         env:
