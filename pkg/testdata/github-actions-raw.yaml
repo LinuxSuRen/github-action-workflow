@@ -1,0 +1,20 @@
+name: build
+
+jobs:
+  build:
+    name: build
+    steps:
+      - name: shell
+        uses: docker://alpine
+        with:
+          args: echo 1
+
+raw: |
+  spec:
+    hooks:
+      exit:
+        templateRef:
+          name: library
+          template: status
+          clusterScope: true
+

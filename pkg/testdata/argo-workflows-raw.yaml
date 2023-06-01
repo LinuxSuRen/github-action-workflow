@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: build
+spec:
+  arguments:
+    parameters:
+    - default: master
+      name: branch
+    - default: -1
+      name: pr
+  entrypoint: main
+  hooks:
+    exit:
+      templateRef:
+        clusterScope: true
+        name: library
+        template: status
+  templates:
+  - dag:
+      tasks:
+      - name: shell
+        template: shell
+    name: main
+  - name: shell
+    script:
+      command:
+      - sh
+      image: alpine
+      source: |
+        echo 1
+      volumeMounts:
+      - mountPath: /work
+        name: work
+      workingDir: /work
+  volumeClaimTemplates:
+  - metadata:
+      name: work
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 64Mi
