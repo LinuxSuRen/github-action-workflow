@@ -38,6 +38,10 @@ func TestWorkflow_ConvertToArgoWorkflow(t *testing.T) {
 		name:          "with retry event",
 		githubActions: "testdata/github-actions-retry-event.yaml",
 		argoWorkflows: "testdata/argo-workflows-retry-event.yaml",
+	}, {
+		name:          "with raw",
+		githubActions: "testdata/github-actions-raw.yaml",
+		argoWorkflows: "testdata/argo-workflows-raw.yaml",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

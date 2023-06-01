@@ -9,6 +9,7 @@ type Workflow struct {
 	On          interface{} // could be: string, []string, Event
 	Jobs        map[string]Job
 	Concurrency string
+	Raw         string
 
 	// extra fields
 	GitRepository string
@@ -101,4 +102,44 @@ type Step struct {
 	Image   string
 	Depends string
 	Secret  string
+}
+
+func mergeYAML(origin, sub string) (result string, err error) {
+	originObj := map[interface{}]interface{}{}
+	subObj := map[interface{}]interface{}{}
+
+	if err = yaml.Unmarshal([]byte(origin), originObj); err != nil {
+		return
+	}
+	if err = yaml.Unmarshal([]byte(sub), subObj); err != nil {
+		return
+	}
+
+	var data []byte
+	resultObj := mergeMaps(originObj, subObj)
+	if data, err = yaml.Marshal(resultObj); err == nil {
+		result = string(data)
+	}
+	return
+}
+
+func mergeMaps(a, b map[interface{}]interface{}) map[interface{}]interface{} {
+	out := make(map[interface{}]interface{}, len(a))
+	for k, v := range a {
+		out[k] = v
+	}
+
+	for k, v := range b {
+		switch tv := v.(type) {
+		case map[interface{}]interface{}:
+			if bv, ok := out[k]; ok {
+				if bv, ok := bv.(map[interface{}]interface{}); ok {
+					out[k] = mergeMaps(bv, tv)
+					continue
+				}
+			}
+		}
+		out[k] = v
+	}
+	return out
 }

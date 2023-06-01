@@ -138,6 +138,15 @@ fi`, w.GitRepository)
 	data := bytes.NewBuffer([]byte{})
 	if err = t.Execute(data, w); err == nil {
 		output = strings.TrimSpace(data.String())
+	} else {
+		return
+	}
+
+	if w.Raw != "" {
+		if output, err = mergeYAML(output, w.Raw); err != nil {
+			err = fmt.Errorf("failed to merge raw into YAML: %v", err)
+			return
+		}
 	}
 
 	// generate workflowEventBinding

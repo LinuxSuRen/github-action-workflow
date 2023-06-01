@@ -64,3 +64,55 @@ on:
 		Cron: "30 5 * * 2,4",
 	}}, schedules)
 }
+
+func TestMergeYAML(t *testing.T) {
+	tests := []struct {
+		name     string
+		origin   string
+		sub      string
+		expected string
+		hasErr   bool
+	}{{
+		name:   "origin YAML is invalid",
+		origin: "name=rick",
+		hasErr: true,
+	}, {
+		name:   "sub YAML is invalid",
+		sub:    "name=rick",
+		hasErr: true,
+	}, {
+		name:   "simple without conflicts",
+		origin: `name: rick`,
+		sub:    `age: 12`,
+		expected: `age: 12
+name: rick
+`,
+	}, {
+		name:   "have the same key",
+		origin: `name: rick`,
+		sub:    `name: linuxsuren`,
+		expected: `name: linuxsuren
+`,
+	}, {
+		name: "multiple levels",
+		origin: `name: rick
+works:
+  age: 12`,
+		sub: `works:
+  term: 10
+  subject: math`,
+		expected: `name: rick
+works:
+  age: 12
+  subject: math
+  term: 10
+`,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := mergeYAML(tt.origin, tt.sub)
+			assert.Equal(t, tt.expected, result)
+			assert.Equal(t, tt.hasErr, err != nil, err)
+		})
+	}
+}
