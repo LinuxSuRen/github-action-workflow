@@ -51,7 +51,7 @@ func TestWorkflow_ConvertToArgoWorkflow(t *testing.T) {
 			err = yaml.Unmarshal(data, w)
 			assert.Nil(t, err)
 
-			gotOutput, err := w.ConvertToArgoWorkflow()
+			gotOutput, err := w.ConvertToArgoWorkflow(false)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ConvertToArgoWorkflow() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -65,7 +65,7 @@ func TestWorkflow_ConvertToArgoWorkflow(t *testing.T) {
 
 	// workflow name is empty
 	wf := &Workflow{}
-	result, err := wf.ConvertToArgoWorkflow()
+	result, err := wf.ConvertToArgoWorkflow(false)
 	assert.Equal(t, "", result)
 	assert.Nil(t, err)
 }

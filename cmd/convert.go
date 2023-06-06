@@ -25,8 +25,9 @@ func newConvertCmd() (c *cobra.Command) {
 	}
 
 	flags := c.Flags()
-	flags.StringToStringVarP(&opt.env, "env", "e", nil,
-		"Environment variables for all steps")
+	flags.StringToStringVarP(&opt.env, "env", "e", nil, "Environment variables for all steps")
+	flags.BoolVarP(&opt.onlyWorkflowResource, "onlyWorkflowResource", "o", false,
+		"If true only create WorkflowTemplate and CronWorkflow and WorkflowEventBinding,default false")
 	return
 }
 
@@ -120,7 +121,7 @@ func (o *convertOption) convert(gh *pkg.Workflow) (output string, err error) {
 
 	o.preHandle(gh)
 
-	output, err = gh.ConvertToArgoWorkflow()
+	output, err = gh.ConvertToArgoWorkflow(o.onlyWorkflowResource)
 	return
 }
 
@@ -135,6 +136,7 @@ func (o *convertOption) preHandle(gh *pkg.Workflow) {
 }
 
 type convertOption struct {
-	env           map[string]string
-	gitRepository string
+	env                  map[string]string
+	onlyWorkflowResource bool
+	gitRepository        string
 }
