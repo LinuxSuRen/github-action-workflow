@@ -72,7 +72,7 @@ func getBranchSelector(eventName, branch string) string {
 	}
 }
 
-func (w *Workflow) ConvertToArgoWorkflow() (output string, err error) {
+func (w *Workflow) ConvertToArgoWorkflow(owr bool) (output string, err error) {
 	if w.Name == "" {
 		// name is required
 		return
@@ -160,7 +160,7 @@ fi`, w.GitRepository)
 		}
 	}
 
-	if len(w.GetWorkflowBindings()) > 0 {
+	if len(w.GetWorkflowBindings()) > 0 && !owr {
 		output = output + "\n---\n" + strings.TrimSpace(eventBindingRole)
 		output = output + "\n---\n" + strings.TrimSpace(eventBindingGitHubServiceAccount)
 		output = output + "\n---\n" + strings.TrimSpace(eventBindingGitHubRoleBinding)
