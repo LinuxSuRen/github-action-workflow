@@ -1,0 +1,11 @@
+name: build
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: build
+        uses: template://library/image
+        with:
+          dockerfile: Dockerfile

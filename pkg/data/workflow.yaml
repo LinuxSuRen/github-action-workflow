@@ -36,12 +36,26 @@ spec:
             {{- if $step.Depends}}
             depends: {{$step.Depends}}
             {{- end}}
+      {{- else}}
+        - name: {{$step.Name}}
+          templateRef:
+            name: {{$step.With.library}}
+            template: {{$step.With.template}}
+            clusterScope: true
+          arguments:
+            parameters:
+          {{- range $key, $value := $step.With}}
+              - name: {{$key}}
+                value: {{$value}}
+          {{- end}}
       {{- end}}
+
       {{- end}}
       {{- end}}
 
       {{- range $key, $job := .Jobs}}
       {{- range $i, $step := $job.Steps}}
+      
       {{- if $step.Image}}
     - name: {{$step.Name}}
       {{- if $step.Secret}}
@@ -72,5 +86,6 @@ spec:
         {{- end}}
         workingDir: /work
       {{- end}}
+
       {{- end}}
       {{- end}}
