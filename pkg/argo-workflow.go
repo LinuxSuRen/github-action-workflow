@@ -109,6 +109,15 @@ fi`, w.GitRepository)
 			} else if strings.HasPrefix(w.Jobs[i].Steps[j].Uses, "docker://") {
 				w.Jobs[i].Steps[j].Image = strings.TrimPrefix(w.Jobs[i].Steps[j].Uses, "docker://")
 				w.Jobs[i].Steps[j].Run = w.Jobs[i].Steps[j].With["args"]
+			} else if strings.HasPrefix(w.Jobs[i].Steps[j].Uses, "template://") {
+				template := strings.TrimPrefix(w.Jobs[i].Steps[j].Uses, "template://")
+				templateSpe := strings.Split(template, "/")
+				if len(templateSpe) >= 2 {
+					w.Jobs[i].Steps[j].With["library"] = templateSpe[0]
+					w.Jobs[i].Steps[j].With["template"] = templateSpe[1]
+				}
+
+				w.Jobs[i].Steps[j].Image = ""
 			} else if w.Jobs[i].Steps[j].Uses != "" {
 				// TODO not support yet, do nothing
 				continue
