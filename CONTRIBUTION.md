@@ -122,6 +122,7 @@ spec:
 EOF
 ```
 
+Please make sure there is a special file `.gaw` exists in the target directory `.github/workflows/`:
 ```yaml
 name: Build
 
