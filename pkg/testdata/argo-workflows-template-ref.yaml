@@ -22,16 +22,16 @@ spec:
     - name: main
       dag:
         tasks:
-        - name: build
-          templateRef:
-            name: library
-            template: image
-            clusterScope: true
-          arguments:
-            parameters:
-              - name: dockerfile
-                value: Dockerfile
-              - name: library
-                value: library
-              - name: template
-                value: image
+          - name: build
+            templateRef:
+              name: library
+              template: image
+              clusterScope: true
+            arguments:
+              parameters:
+                - name: dockerfile
+                  value: Dockerfile
+                - name: library
+                  value: library
+                - name: template
+                  value: image

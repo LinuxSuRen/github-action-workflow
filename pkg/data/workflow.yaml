@@ -37,17 +37,17 @@ spec:
             depends: {{$step.Depends}}
             {{- end}}
       {{- else}}
-        - name: {{$step.Name}}
-          templateRef:
-            name: {{$step.With.library}}
-            template: {{$step.With.template}}
-            clusterScope: true
-          arguments:
-            parameters:
-          {{- range $key, $value := $step.With}}
-              - name: {{$key}}
-                value: {{$value}}
-          {{- end}}
+          - name: {{$step.Name}}
+            templateRef:
+              name: {{$step.With.library}}
+              template: {{$step.With.template}}
+              clusterScope: true
+            arguments:
+              parameters:
+            {{- range $key, $value := $step.With}}
+                - name: {{$key}}
+                  value: {{$value}}
+            {{- end}}
       {{- end}}
 
       {{- end}}

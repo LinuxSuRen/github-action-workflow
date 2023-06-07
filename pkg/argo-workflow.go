@@ -151,9 +151,14 @@ fi`, w.GitRepository)
 		return
 	}
 
+	if output == "" {
+		err = fmt.Errorf("failed to generate workflow template, empty output")
+		return
+	}
+
 	if w.Raw != "" {
 		if output, err = mergeYAML(output, w.Raw); err != nil {
-			err = fmt.Errorf("failed to merge raw into YAML: %v", err)
+			err = fmt.Errorf("failed to merge raw into YAML: %v - %s", err, output)
 			return
 		}
 	}
