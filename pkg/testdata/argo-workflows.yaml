@@ -51,7 +51,7 @@ spec:
         command: [sh]
         env:
           - name: GOPROXY
-            value: https://goproxy.io,direct
+            value: "https://goproxy.io,direct"
         source: |
           go test ./... -coverprofile coverage.out
         volumeMounts:
@@ -64,7 +64,7 @@ spec:
         command: [sh]
         env:
           - name: GOPROXY
-            value: https://goproxy.io,direct
+            value: "https://goproxy.io,direct"
         source: |
           goreleaser release --skip-publish --rm-dist
         volumeMounts:

@@ -30,7 +30,7 @@ spec:
         command: [sh]
         env:
           - name: key
-            value: value
+            value: "value"
         source: |
           echo 1
         volumeMounts:

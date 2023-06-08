@@ -75,7 +75,7 @@ spec:
         env:
         {{- range $k, $v := $step.Env}}
           - name: {{$k}}
-            value: {{$v}}
+            value: "{{$v}}"
         {{- end}}
         {{- end}}
         source: |
