@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -32,18 +33,26 @@ func newConvertCmd() (c *cobra.Command) {
 }
 
 func (o *convertOption) preRunE(cmd *cobra.Command, args []string) (err error) {
-	var repo *git.Repository
-	if repo, err = git.PlainOpenWithOptions(".", &git.PlainOpenOptions{
-		DetectDotGit: true,
-	}); err == nil {
-		var remote *git.Remote
-		if remote, err = repo.Remote(git.DefaultRemoteName); err == nil {
-			o.gitRepository = remote.Config().URLs[0]
-		}
+	if len(args) <= 0 {
+		err = fmt.Errorf("no workflow file specified")
+		return
 	}
 
-	// find environment variables
-	o.parseEnv()
+	targetFilePath := args[0]
+	if targetFilePath, err = filepath.Abs(targetFilePath); err == nil {
+		var repo *git.Repository
+		if repo, err = git.PlainOpenWithOptions(targetFilePath, &git.PlainOpenOptions{
+			DetectDotGit: true,
+		}); err == nil {
+			var remote *git.Remote
+			if remote, err = repo.Remote(git.DefaultRemoteName); err == nil {
+				o.gitRepository = remote.Config().URLs[0]
+			}
+		}
+
+		// find environment variables
+		o.parseEnv()
+	}
 	return
 }
 

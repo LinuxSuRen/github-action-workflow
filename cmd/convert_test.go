@@ -284,11 +284,22 @@ func Test_convertOption_preRunE(t *testing.T) {
 		wantErr assert.ErrorAssertionFunc
 	}{{
 		name: "simple",
+		args: args{
+			args: []string{"data/github-workflow-*.yaml"},
+		},
 		check: func(t *testing.T, opt *convertOption) {
 			assert.Contains(t, strings.ToLower(opt.gitRepository), "linuxsuren/github-action-workflow")
 		},
 		wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 			assert.Nil(t, err)
+			return true
+		},
+	}, {
+		name: "args is empty",
+		check: func(t *testing.T, opt *convertOption) {
+		},
+		wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+			assert.Error(t, err)
 			return true
 		},
 	}}
