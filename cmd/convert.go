@@ -71,6 +71,10 @@ func (o *convertOption) parseEnv() {
 			}
 		}
 	}
+
+	if _, ok := o.env["onlyWorkflowResource"]; ok {
+		o.onlyWorkflowResource = true
+	}
 }
 
 func (o *convertOption) runE(cmd *cobra.Command, args []string) (err error) {

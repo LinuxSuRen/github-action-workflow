@@ -284,6 +284,11 @@ func Test_convertOption_preRunE(t *testing.T) {
 		wantErr assert.ErrorAssertionFunc
 	}{{
 		name: "simple",
+		fields: fields{
+			env: map[string]string{
+				"onlyWorkflowResource": "true",
+			},
+		},
 		args: args{
 			args: []string{"data/github-workflow-*.yaml"},
 		},
