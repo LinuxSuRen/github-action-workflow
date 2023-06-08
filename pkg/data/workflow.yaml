@@ -38,6 +38,9 @@ spec:
             {{- end}}
       {{- else}}
           - name: {{$step.Name}}
+            {{- if $step.Depends}}
+            depends: {{$step.Depends}}
+            {{- end}}
             templateRef:
               name: {{$step.With.library}}
               template: {{$step.With.template}}
