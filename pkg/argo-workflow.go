@@ -70,10 +70,7 @@ func (w *Workflow) GetWorkflowBindings() (wfbs []WorkflowEventBinding) {
 func getBranchSelector(eventName, branch string) string {
 	switch eventName {
 	case "push":
-		if strings.HasSuffix(branch, "-") {
-			return fmt.Sprintf(`payload.ref startsWith "refs/heads/%s" || `, branch)
-		}
-		return fmt.Sprintf(`payload.ref == "refs/heads/%s" || `, branch)
+		return fmt.Sprintf(`payload.ref matches "refs/heads/%s" || `, branch)
 	default: // it should be merge_request
 		return fmt.Sprintf(`payload.object_attributes.target_branch == "%s" || `, branch)
 	}

@@ -41,7 +41,7 @@ metadata:
   name: imagetest-push
 spec:
   event:
-    selector: payload.object_kind == "push" && payload.project.path_with_namespace endsWith "" && (payload.ref == "refs/heads/main" || payload.ref == "refs/heads/test" || payload.ref startsWith "refs/heads/release-")
+    selector: payload.object_kind == "push" && payload.project.path_with_namespace endsWith "" && (payload.ref matches "refs/heads/main" || payload.ref matches "refs/heads/test" || payload.ref matches "refs/heads/release-*")
   submit:
     workflowTemplateRef:
       name: imagetest
