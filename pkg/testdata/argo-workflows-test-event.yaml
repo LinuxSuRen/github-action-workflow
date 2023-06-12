@@ -1,0 +1,56 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: imagetest
+spec:
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: branch
+        default: master
+      - name: pr
+        default: -1
+  volumeClaimTemplates:
+    - metadata:
+        name: work
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 64Mi
+  templates:
+    - name: main
+      dag:
+        tasks:
+          - name: test
+            template: test
+    - name: test
+      script:
+        image: alpine:3.8
+        command: [sh]
+        source: |
+          echo 1
+        volumeMounts:
+          - mountPath: /work
+            name: work
+        workingDir: /work
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowEventBinding
+metadata:
+  name: imagetest-test
+spec:
+  event:
+    selector: payload.event_type == "note" && payload.merge_request.state == "opened" && payload.object_attributes.note == "/test" && payload.project.path_with_namespace endsWith ""
+  submit:
+    workflowTemplateRef:
+      name: imagetest
+    arguments:
+      parameters:
+        - name: branch
+          valueFrom:
+            event: "payload.object_attributes.source_branch"
+        - name: pr
+          valueFrom:
+            event: "payload.merge_request.iid"
