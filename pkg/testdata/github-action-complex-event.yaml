@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - test
+      - release-*
   merge_request:
     branches:
       - main
