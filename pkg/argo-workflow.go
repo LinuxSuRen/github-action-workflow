@@ -55,6 +55,10 @@ func (w *Workflow) GetWorkflowBindings() (wfbs []WorkflowEventBinding) {
 			binding.Parameters["branch"] = "payload.object_attributes.source_branch"
 			binding.Parameters["pr"] = "payload.merge_request.iid"
 			binding.Selector = fmt.Sprintf(`payload.event_type == "note" && payload.merge_request.state == "opened" && payload.object_attributes.note == "/retry" && %s`, projectSelector)
+		case "test":
+			binding.Parameters["branch"] = "payload.merge_request.source_branch"
+			binding.Parameters["pr"] = "payload.merge_request.iid"
+			binding.Selector = fmt.Sprintf(`payload.event_type == "note" && payload.merge_request.state == "opened" && payload.object_attributes.note == "/test" && %s`, projectSelector)
 		default:
 			continue
 		}
