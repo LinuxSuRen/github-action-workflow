@@ -117,6 +117,9 @@ fi`, w.GitRepository)
 				template := strings.TrimPrefix(w.Jobs[i].Steps[j].Uses, "template://")
 				templateSpe := strings.Split(template, "/")
 				if len(templateSpe) >= 2 {
+					if w.Jobs[i].Steps[j].With == nil {
+						w.Jobs[i].Steps[j].With = make(map[string]string)
+					}
 					w.Jobs[i].Steps[j].With["library"] = templateSpe[0]
 					w.Jobs[i].Steps[j].With["template"] = templateSpe[1]
 				}
