@@ -24,14 +24,14 @@ spec:
         tasks:
           - name: build
             templateRef:
-              name: library
-              template: image
+              name: "library"
+              template: "image"
               clusterScope: true
             arguments:
               parameters:
                 - name: dockerfile
-                  value: Dockerfile
+                  value: "Dockerfile"
                 - name: library
-                  value: library
+                  value: "library"
                 - name: template
-                  value: image
+                  value: "image"
