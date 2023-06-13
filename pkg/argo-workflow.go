@@ -143,6 +143,8 @@ fi`, w.GitRepository)
 		break
 	}
 
+	w.Jobs = addQuotationMark(w.Jobs)
+
 	// generate workflowTemplate
 	var t *template.Template
 	if t, err = template.New("argo").Funcs(sprig.GenericFuncMap()).Parse(argoworkflowTemplate); err != nil {
@@ -210,4 +212,17 @@ type WorkflowEventBinding struct {
 	Ref        string
 	Selector   string
 	Parameters map[string]string
+}
+
+func addQuotationMark(jobs map[string]Job) map[string]Job {
+	for jk, job := range jobs {
+		for sk, step := range job.Steps {
+			for k, v := range step.With {
+				step.With[k] = `"` + v + `"`
+			}
+			job.Steps[sk] = step
+		}
+		jobs[jk] = job
+	}
+	return jobs
 }
