@@ -41,7 +41,7 @@ metadata:
   name: imagetest-push
 spec:
   event:
-    selector: payload.object_kind == "push" && payload.project.path_with_namespace endsWith "" && (payload.ref matches "refs/heads/main" || payload.ref matches "refs/heads/test" || payload.ref matches "refs/heads/release-*")
+    selector: payload.object_kind == "push" && payload.project.path_with_namespace endsWith "LinuxSuRen/yaml-readme" && (payload.ref matches "refs/heads/main" || payload.ref matches "refs/heads/test" || payload.ref matches "refs/heads/release-*")
   submit:
     workflowTemplateRef:
       name: imagetest
@@ -60,7 +60,7 @@ metadata:
   name: imagetest-merge-request
 spec:
   event:
-    selector: payload.object_kind == "merge_request" && payload.project.path_with_namespace endsWith "" && (payload.object_attributes.target_branch == "main") && payload.object_attributes.state == "opened"
+    selector: payload.object_kind == "merge_request" && payload.project.path_with_namespace endsWith "LinuxSuRen/yaml-readme" && (payload.object_attributes.target_branch == "main") && payload.object_attributes.state == "opened"
   submit:
     workflowTemplateRef:
       name: imagetest

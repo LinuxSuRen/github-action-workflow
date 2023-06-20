@@ -18,8 +18,7 @@ func k8sStyleName(name string) (result string) {
 func (w *Workflow) GetWorkflowBindings() (wfbs []WorkflowEventBinding) {
 	projectName := w.GitRepository
 	if strings.Contains(projectName, "/") {
-		projectName = strings.TrimSuffix(projectName, ".git")
-		projectName = strings.Split(projectName, "/")[1]
+		projectName = getProjectName(projectName)
 	}
 
 	for _, e := range w.GetEvent() {
@@ -228,4 +227,17 @@ func addQuotationMark(jobs map[string]Job) map[string]Job {
 		jobs[jk] = job
 	}
 	return jobs
+}
+
+func getProjectName(projectName string) string {
+	projectName = strings.TrimSuffix(projectName, ".git")
+	var index int
+	if strings.HasPrefix(projectName, "git@") {
+		index = strings.Index(projectName, ":")
+		projectName = projectName[index+1:]
+	} else {
+		parts := strings.SplitN(projectName, "/", 4)
+		projectName = parts[3]
+	}
+	return projectName
 }

@@ -41,7 +41,7 @@ metadata:
   name: imagetest-retry
 spec:
   event:
-    selector: payload.event_type == "note" && payload.merge_request.state == "opened" && payload.object_attributes.note == "/retry" && payload.project.path_with_namespace endsWith ""
+    selector: payload.event_type == "note" && payload.merge_request.state == "opened" && payload.object_attributes.note == "/retry" && payload.project.path_with_namespace endsWith "LinuxSuRen/yaml-readme"
   submit:
     workflowTemplateRef:
       name: imagetest
