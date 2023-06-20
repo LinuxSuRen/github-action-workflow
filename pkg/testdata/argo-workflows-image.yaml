@@ -41,7 +41,7 @@ metadata:
   name: imagetest-push
 spec:
   event:
-    selector: payload.object_kind == "push" && payload.project.path_with_namespace endsWith ""
+    selector: payload.object_kind == "push" && payload.project.path_with_namespace endsWith "LinuxSuRen/yaml-readme"
   submit:
     workflowTemplateRef:
       name: imagetest
