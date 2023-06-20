@@ -73,3 +73,43 @@ func TestWorkflow_ConvertToArgoWorkflow(t *testing.T) {
 	assert.Equal(t, "", result)
 	assert.Nil(t, err)
 }
+
+func Test_getProjectName(t *testing.T) {
+	type args struct {
+		projectName string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "gaw1",
+			args: args{
+				projectName: "https://github.com/LinuxSuRen/github-action-workflow.git",
+			},
+			want: "LinuxSuRen/github-action-workflow",
+		},
+		{
+			name: "gaw2",
+			args: args{
+				projectName: "git@github.com:LinuxSuRen/github-action-workflow.git",
+			},
+			want: "LinuxSuRen/github-action-workflow",
+		},
+		{
+			name: "gaw3",
+			args: args{
+				projectName: "git@github.com:group0/group1/LinuxSuRen/github-action-workflow.git",
+			},
+			want: "group0/group1/LinuxSuRen/github-action-workflow",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getProjectName(tt.args.projectName); got != tt.want {
+				t.Errorf("getProjectName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
